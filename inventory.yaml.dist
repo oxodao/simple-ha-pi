@@ -1,0 +1,56 @@
+all:
+  hosts:
+    domotique:
+      ansible_host: 'domotique.local'
+      ansible_username: 'oxodao'
+
+      # Cela donnera domain.tld pour les noms de domaines
+      domain: 'domotique'
+      tld: 'local'
+
+      # Restic settings
+      restic_path: 's3.<REGION>.backblazeb2.com/<BACKUP>'
+      restic_access_id: '<Access ID>'
+      restic_secret_id: '<Secret ID>'
+      restic_repository_password: 'Repository password'
+
+      # SimpleNotifier Webhook URL
+      simple_notifier_hook: 'https://discord.com/api/webhooks/xxxx/xxxx'
+
+      # Certificat SSL utilisé par nginx
+      nginx_public_key: |2
+        -----BEGIN CERTIFICATE-----
+        CLÉ PUBLIQUE NGINX "PUBLIC"
+        -----END CERTIFICATE-----
+
+      nginx_private_key: |2
+        -----BEGIN PRIVATE KEY-----
+        CLÉ PRIVÉE NGINX "PUBLIC"
+        -----END PRIVATE KEY-----
+
+    # Configuration du wireguard
+    wireguard:
+        ip_prefix: '192.168.70.'
+        port: ''
+        private_key: ''
+        public_key: ''
+
+        post_up:
+          - 'iptables -A FORWARD -i %i -j ACCEPT'
+          - 'iptables -A FORWARD -o %i -j ACCEPT'
+          - 'iptables -t nat -A POSTROUTING -o enX0 -j MASQUERADE' # @TODO: Check interface
+
+        post_down:
+          - 'iptables -D FORWARD -i %i -j ACCEPT'
+          - 'iptables -D FORWARD -o %i -j ACCEPT'
+          - 'iptables -t nat -D POSTROUTING -o enX0 -j MASQUERADE' # @TODO: Check interface
+
+        # Les machines auront pour IP assignée
+        # le prefix d'ip fournis plus haut
+        # puis une ip machine égale à celle sur
+        # le réseau local.
+        machines:
+          - hostname: 'user'
+            public_key: ''
+            private_key: ''
+            ip: '80'

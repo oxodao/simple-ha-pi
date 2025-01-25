@@ -1,0 +1,9 @@
+ntp_timezone: 'Europe/Paris'
+ssh_port: '57982'
+
+tld: 'local'
+
+hostname: '{{domain}}.{{tld}}'
+base_ip: '{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}'
+
+lan_ip_prefix: "192.168.14."

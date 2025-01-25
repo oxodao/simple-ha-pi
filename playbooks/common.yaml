@@ -1,0 +1,45 @@
+---
+- hosts: 'all'
+  become: yes
+  tags: ['common']
+
+  tasks:
+    - import_role: { name: 'geerlingguy.ntp' }
+    - import_role: { name: 'hifis.unattended_upgrades' }
+    - import_role: { name: 'geerlingguy.docker' }
+
+    - name: 'Installing some softwares'
+      apt:
+        name: [ 'zip', 'unzip', 'fuse', 'zsh', 'rsync', 'sqlite3', 'iptables', 'vim', 'git', 'exa', 'direnv', 'atool']
+
+    - name: 'Enabling fuse'
+      modprobe:
+        name: 'fuse'
+        state: 'present'
+
+    - name: 'Change owner of /opt'
+      file:
+        path: '/opt'
+        owner: '{{ansible_username}}'
+        group: '{{ansible_username}}'
+
+    - name: 'Create required groups'
+      group:
+        name: '{{item}}'
+        state: 'present'
+      loop:
+        - 'sudo'
+        - 'docker'
+
+    - name: 'Add user to the correct groups'
+      user:
+        name: '{{ansible_username}}'
+        groups: '{{item}}'
+        append: yes
+      loop:
+        - 'sudo'
+        - 'docker'
+
+    - name: 'Weird thing to be sure the user has the docker group'
+      ansible.builtin.meta:
+        reset_connection

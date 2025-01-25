@@ -1,0 +1,26 @@
+---
+- hosts: 'all'
+  become: no
+  tags: ['homeassistant']
+
+  tasks:
+    - name: 'Create the app folder'
+      file:
+        path: '/home/{{ansible_username}}/homeassistant'
+        state: 'directory'
+        mode: 0777
+
+    - name: 'Copying the docker-compose file'
+      include_tasks:
+        file: '../tasks/add_docker_app.yaml'
+      vars:
+        app_name: 'homeassistant'
+        app_directories:
+          - config
+
+    - name: 'Setting-up nginx for Home Assistant'
+      include_tasks:
+        file: '../tasks/add_nginx_app.yaml'
+      vars:
+        app_name: 'homeassistant'
+        enabled: yes
