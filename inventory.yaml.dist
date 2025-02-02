@@ -44,12 +44,10 @@ all:
           post_up:
             - 'iptables -A FORWARD -i %i -j ACCEPT'
             - 'iptables -A FORWARD -o %i -j ACCEPT'
-            - 'iptables -t nat -A POSTROUTING -o end0 -j MASQUERADE'
 
           post_down:
             - 'iptables -D FORWARD -i %i -j ACCEPT'
             - 'iptables -D FORWARD -o %i -j ACCEPT'
-            - 'iptables -t nat -D POSTROUTING -o end0 -j MASQUERADE'
 
           # Machines will have an IP assigned using the prefix
           # specified above
