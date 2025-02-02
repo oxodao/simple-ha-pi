@@ -1,0 +1,87 @@
+---
+- hosts: 'all'
+  tags: ['backups']
+
+  tasks:
+    - name: 'Installing some softwares'
+      become: yes
+      apt:
+        name: 'restic'
+
+    - name: 'Adding the restic user'
+      become: yes
+      user:
+        name: 'restic'
+        shell: '/sbin/nologin'
+        system: yes
+      
+    - name: 'Adding cap on restic bin'
+      become: yes
+      capabilities:
+        capability: 'cap_dac_read_search=+ep'
+        path: '/usr/bin/restic'
+        state: 'present'
+
+    - name: 'Check if resticprofile is installed'
+      stat:
+        path: '/usr/bin/resticprofile'
+      register: 'resticprofile_exists'
+
+    - name: 'Getting the resticprofile url'
+      get_release_url:
+        repository: 'creativeprojects/resticprofile'
+      register: resticprofile_url
+      when: not resticprofile_exists.stat.exists
+
+    - name: 'Download & extract resticprofile'
+      unarchive:
+        src: '{{resticprofile_url.meta}}'
+        dest: '/opt'
+        remote_src: yes
+      when: not resticprofile_exists.stat.exists
+
+    - name: 'Remove useless files'
+      file:
+        path: '/opt/{{item}}'
+        state: 'absent'
+      loop:
+        - 'LICENSE'
+        - 'README.md'
+      when: not resticprofile_exists.stat.exists
+
+    - name: 'Create symlink for resticprofile'
+      become: yes
+      file:
+        src: '/opt/resticprofile'
+        dest: '/usr/bin/resticprofile'
+        state: 'link'
+      when: not resticprofile_exists.stat.exists
+
+    - name: 'Creating the config dir'
+      become: yes
+      file:
+        path: '/etc/resticprofile'
+        state: 'directory'
+
+    - name: 'Adding the password file'
+      become: yes
+      copy:
+        dest: '/root/restic_password.txt'
+        content: '{{ restic_repository_password }}'
+        owner: 'root'
+        group: 'root'
+        mode: '0600'
+
+    - name: 'Adding the backup config profiles'
+      become: yes
+      template:
+        src: '../templates/resticprofile.yaml.j2'
+        dest: '/etc/resticprofile/profiles.yaml'
+
+    - name: 'Adding the crontab'
+      cron:
+        name: 'backup_job'
+        job: 'resticprofile --name "full" backup'
+        minute: 0
+        weekday: 1
+        hour: 0

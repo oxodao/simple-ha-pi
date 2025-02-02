@@ -1,0 +1,13 @@
+# Wireguard config for
+# {{ machine.hostname }}
+
+[Interface]
+PrivateKey = {{ machine.private_key }}
+# PublicKey = {{ machine.public_key }}
+Address = {{ server.ip_prefix }}{{ machine.ip }}/24
+DNS = {{ server.ip_prefix }}1
+
+[Peer]
+PublicKey = {{ server.public_key }}
+AllowedIPs = {{ server.allowed_ips }}
+Endpoint = {{ server.public_ip }}:{{ server.port }}

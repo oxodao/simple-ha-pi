@@ -1,0 +1,37 @@
+version: '1'
+
+groups:
+  full:
+    - 'homeassistant'
+
+default:
+    repository: 's3:{{ restic_path }}'
+    password-file: '/root/restic_password.txt'
+
+    env:
+        AWS_ACCESS_KEY_ID: '{{ restic_access_id }}'
+        AWS_SECRET_ACCESS_KEY: '{{ restic_secret_id }}'
+
+    backup:
+        run-before:
+            - 'sn -l main_bot -m "Backing up $PROFILE_NAME..."'
+            - 'cd ~{{ansible_username}}/$RESTIC_APP && docker compose down'
+        run-after:
+            - 'sn -l main_bot -m "$PROFILE_NAME backed up!"'
+        run-after-fail:
+            - 'sn -l main_bot -m "Failed to backup $PROFILE_NAME: $ERROR_MESSAGE\n$ERROR_STDERR"'
+        run-finally:
+            - 'cd ~{{ansible_username}}/$RESTIC_APP && docker compose up -d'
+
+#region Home Assistant
+homeassistant:
+    inherit: 'default'
+    lock: '/tmp/resticprofile_homeassistant.lock'
+
+    run-before:
+        - 'echo "RESTIC_APP=homeassistant" > "{{ "{{env}}" }}"'
+
+    backup:
+        source: ['/home/{{ ansible_username }}/homeassistant']
+        tag: ['homeassistant']
+#endregion

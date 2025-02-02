@@ -5,4 +5,4 @@
 - import_playbook: 'playbooks/simplenotifier.yaml'
 - import_playbook: 'playbooks/wireguard.yaml'
 - import_playbook: 'playbooks/homeassistant.yaml'
-# - import_playbook: 'playbooks/backups.yaml'
+- import_playbook: 'playbooks/backups.yaml'

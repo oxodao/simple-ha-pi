@@ -4,53 +4,57 @@ all:
       ansible_host: 'domotique.local'
       ansible_username: 'oxodao'
 
-      # Cela donnera domain.tld pour les noms de domaines
+      # This will gives the domain.tld domain for your machine
       domain: 'domotique'
       tld: 'local'
 
       # Restic settings
-      restic_path: 's3.<REGION>.backblazeb2.com/<BACKUP>'
+      restic_path: 's3.<REGION>.backblazeb2.com/<BUCKET>'
       restic_access_id: '<Access ID>'
       restic_secret_id: '<Secret ID>'
-      restic_repository_password: 'Repository password'
+      restic_repository_password: '<Repository password>'
 
       # SimpleNotifier Webhook URL
       simple_notifier_hook: 'https://discord.com/api/webhooks/xxxx/xxxx'
 
-      # Certificat SSL utilisé par nginx
+      # SSL Certificate used by nginx
       nginx_public_key: |2
         -----BEGIN CERTIFICATE-----
-        CLÉ PUBLIQUE NGINX "PUBLIC"
+        PUBLIC SSL KEY FOR NGINX
         -----END CERTIFICATE-----
 
       nginx_private_key: |2
         -----BEGIN PRIVATE KEY-----
-        CLÉ PRIVÉE NGINX "PUBLIC"
+        PRIVATE SSL KEY FOR NGINX
         -----END PRIVATE KEY-----
 
-    # Configuration du wireguard
-    wireguard:
-        ip_prefix: '192.168.70.'
-        port: ''
-        private_key: ''
-        public_key: ''
+      # Wireguard config
+      wireguard:
+          public_ip: 'Public IP of the machine'
+          port: 'Wireguard port'
+          private_key: ''
+          public_key: ''
 
-        post_up:
-          - 'iptables -A FORWARD -i %i -j ACCEPT'
-          - 'iptables -A FORWARD -o %i -j ACCEPT'
-          - 'iptables -t nat -A POSTROUTING -o enX0 -j MASQUERADE' # @TODO: Check interface
+          # List of the IPs that the client will have access
+          allowed_ips: '192.168.XX.0/24'
 
-        post_down:
-          - 'iptables -D FORWARD -i %i -j ACCEPT'
-          - 'iptables -D FORWARD -o %i -j ACCEPT'
-          - 'iptables -t nat -D POSTROUTING -o enX0 -j MASQUERADE' # @TODO: Check interface
+          # The network address for the WG clients
+          ip_prefix: '192.168.XX.'
 
-        # Les machines auront pour IP assignée
-        # le prefix d'ip fournis plus haut
-        # puis une ip machine égale à celle sur
-        # le réseau local.
-        machines:
-          - hostname: 'user'
-            public_key: ''
-            private_key: ''
-            ip: '80'
+          post_up:
+            - 'iptables -A FORWARD -i %i -j ACCEPT'
+            - 'iptables -A FORWARD -o %i -j ACCEPT'
+            - 'iptables -t nat -A POSTROUTING -o end0 -j MASQUERADE'
+
+          post_down:
+            - 'iptables -D FORWARD -i %i -j ACCEPT'
+            - 'iptables -D FORWARD -o %i -j ACCEPT'
+            - 'iptables -t nat -D POSTROUTING -o end0 -j MASQUERADE'
+
+          # Machines will have an IP assigned using the prefix
+          # specified above
+          machines:
+            - hostname: 'user'
+              public_key: ''
+              private_key: ''
+              ip: '10'
