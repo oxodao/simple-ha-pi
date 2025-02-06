@@ -1,6 +1,6 @@
 ##### Config
-# DNS_SERVER_IP = '1' # The IP on the WG network of the DNS server
-DNS_SERVER_IP = None
+DNS_SERVER_IP = '1' # The IP on the WG network of the DNS server
+# DNS_SERVER_IP = None
 ##############
 
 from pathlib import Path

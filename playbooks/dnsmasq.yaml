@@ -1,0 +1,28 @@
+---
+- hosts: 'all'
+  become: yes
+  tags: ['dns']
+
+  vars:
+    raspberry:
+      hostname: 'Raspberry Pi'
+      short_name: '{{domain}}'
+      ip: "{{base_ip.split('.')[-1]}}"
+      description: 'The main Raspberry Pi'
+    current_machines: "{{ [ raspberry ] }}"
+
+  tasks:
+    - name: 'Installing some softwares'
+      apt:
+        name: 'dnsmasq'
+
+    - name: 'Config dnsmasq'
+      template:
+        src: '../templates/dnsmasq.conf.j2'
+        dest: '/etc/dnsmasq.conf'
+
+    - name: 'Enable & start the dnsmasq service'
+      service:
+        name: 'dnsmasq'
+        state: 'restarted'
+        enabled: yes
